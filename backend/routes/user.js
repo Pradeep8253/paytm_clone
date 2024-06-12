@@ -13,6 +13,14 @@ const signUpSchema = zod.object({
   firstName: zod.string(),
   lastName: zod.string(),
 });
+
+// update routes
+
+const updateBody = zod.object({
+  password: zod.string().optional(),
+  firstName: zod.string().optional(),
+  lastName: zod.string().optional(),
+});
 router.post("/signup", async (req, res) => {
   const body = req.body;
   const { success } = signUpSchema.safeParse(body);
@@ -42,6 +50,21 @@ router.post("/signup", async (req, res) => {
   res.json({
     message: "User created successfully",
     token: token,
+  });
+});
+
+router.put("/", authMiddleware, async (req, res) => {
+  const { success } = updateBody.safeParse(req.body);
+  if (!success) {
+    res.status(411).json({
+      message: "Error while updating information",
+    });
+  }
+
+  await User.updateOne({ _id: req.userId }, req.body);
+
+  res.json({
+    message: "Updated successfully",
   });
 });
 
